@@ -101,7 +101,7 @@
 
         /* Main Container Layout */
         .container {
-            max-width: 800px;
+            max-width: 650px;
             width: 100%;
             margin: 2rem auto;
             padding: 0 1rem;
@@ -136,16 +136,64 @@
         .question-text {
             font-size: 1.3rem;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
-        .options-grid {
+        .options-list {
+            margin-bottom: 1.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .option-item {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            list-style: none;
+        }
+
+        /* Input Controls Layout */
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .text-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .submit-btn, .nav-action-btn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover, .nav-action-btn:hover { opacity: 0.9; }
+
+        /* Menu Selection Buttons */
+        .menu-grid {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .option-btn {
+        .menu-btn {
             background-color: var(--card-bg);
             border: 2px solid var(--border-color);
             color: var(--text-color);
@@ -155,11 +203,8 @@
             text-align: left;
             cursor: pointer;
             font-weight: 500;
-            display: flex;
-            align-items: center;
         }
-
-        .option-btn:hover {
+        .menu-btn:hover {
             border-color: var(--accent-color);
             background-color: rgba(59, 130, 246, 0.05);
         }
@@ -220,6 +265,7 @@
         @media (max-width: 600px) {
             nav { flex-direction: column; gap: 1rem; }
             main { padding: 1.5rem; }
+            .input-wrapper { flex-direction: column; }
         }
     </style>
 </head>
@@ -241,16 +287,23 @@
     <!-- Main Content App Mount -->
     <div class="container">
         <main id="quiz-container">
-            <!-- Screen 1: Subject Selection Menu -->
+            <!-- Screen 1: Subject Selection Menu (Input field used here as well) -->
             <div id="menu-screen">
                 <h2 style="margin-bottom: 0.5rem;">Welcome to the School Subject Quiz Game!</h2>
-                <p style="margin-bottom: 1.5rem;">Select your favorite subject branch below to begin your examination tracking.</p>
-                <div class="options-grid">
-                    <button class="option-btn" onclick="startQuiz('math')"><b>A.&nbsp;&nbsp;</b> Mathematics</button>
-                    <button class="option-btn" onclick="startQuiz('science')"><b>B.&nbsp;&nbsp;</b> Science</button>
-                    <button class="option-btn" onclick="startQuiz('english')"><b>C.&nbsp;&nbsp;</b> English</button>
-                    <button class="option-btn" onclick="startQuiz('social')"><b>D.&nbsp;&nbsp;</b> Social Studies</button>
+                <p style="margin-bottom: 1rem;">What is your favorite subject?</p>
+                
+                <div class="options-list" style="margin-bottom: 1rem;">
+                    <div class="option-item"><b>a.</b> Mathematics</div>
+                    <div class="option-item"><b>b.</b> Science</div>
+                    <div class="option-item"><b>c.</b> English</div>
+                    <div class="option-item"><b>d.</b> Social Studies</div>
                 </div>
+
+                <div class="input-wrapper">
+                    <input type="text" id="menu-input" class="text-input" placeholder="Type a, b, c, or d..." maxlength="1" autocomplete="off">
+                    <button class="submit-btn" onclick="handleMenuSubmit()">Submit</button>
+                </div>
+                <div id="menu-error" style="color: #991b1b; font-weight: bold; margin-top: 1rem; display: none;">This is not a valid answer.</div>
             </div>
 
             <!-- Screen 2: Dynamic Question Engine Box -->
@@ -262,37 +315,10 @@
                     </div>
                 </div>
                 <div class="question-text" id="question-box">Loading Question...</div>
-                <div class="options-grid" id="options-box">
-                    <!-- Dynamic option buttons insert here -->
+                
+                <div class="options-list" id="options-box">
+                    <!-- Dynamic choices text gets inserted here -->
                 </div>
-                <div id="feedback-box" class="feedback"></div>
-                <button id="next-question-btn" class="next-btn" onclick="advanceQuestion()">Next Question &rarr;</button>
-            </div>
 
-            <!-- Screen 3: Evaluation Summary Box -->
-            <div id="results-screen" class="results-screen" style="display: none;">
-                <h2>Quiz Completed!</h2>
-                <p id="rank-text">Performance Analysis Rendering...</p>
-                <div class="score-badge" id="final-score-badge">0 / 0</div>
-                <p style="margin-bottom: 1.5rem;">Your answers have been computed dynamically using local engine states.</p>
-                <button class="option-btn" style="justify-content: center; width: 100%; max-width: 250px; margin: 0 auto;" onclick="resetQuizApp()">Try Another Subject</button>
-            </div>
-        </main>
-    </div>
-
-    <!-- Footer Area -->
-    <footer>
-        <p>&copy; 2026 EduQuiz Pro Systems. All rights reserved.</p>
-    </footer>
-
-    <!-- Interactive Game Application Script -->
-    <script>
-        // Database storing all quiz variables natively
-        const quizDatabase = {
-            math: {
-                title: "Mathematics",
-                rankings: { low: "You're getting there . . .", mid: "Average highschooler.", high: "Math Master!" },
-                questions: [
-                    { q: "What is 42 * 3?", a: "134", b: "126", c: "104", d: "138", correct: "b" },
-                    { q: "Solve: 144 - 128 = ", a: "16", b: "12", c: "8", d: "6", correct: "a" },
-                    { q: "Solve for x: 2x + 2 = 12", a: "7", b: "6", c: "2", d: "5", correct: "d" },
+                <div id="quiz-interaction-zone">
+                    <div class="input-wrapper">
